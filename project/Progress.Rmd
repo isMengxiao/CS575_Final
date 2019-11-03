@@ -14,43 +14,18 @@ data <- read.csv('https://scads.eecs.wsu.edu/wp-content/uploads/2017/10/AM_strai
 ```{r echo=false}
 location_levels = levels(data$Location.1)
 location_levels = location_levels[2:length(location_levels)]
+TheLevels = c("Location.1", "Location.2", "Location.3", "Location.4", "Location.5")
 
-for (i in levels(data$Location.2)){
-  if (i %in% location_levels){
-    next
-  }
-  if (i == ''){
-    next
-  }
-  location_levels[length(location_levels)+1] = i
-}
-
-for (i in levels(data$Location.3)){
-  if (i %in% location_levels){
-    next
-  }
-  if (i == ''){
-    next
-  }
-  location_levels[length(location_levels)+1] = i
-}
-for (i in levels(data$Location.4)){
-  if (i %in% location_levels){
-    next
-  }
-  if (i == ''){
-    next
-  }
-  location_levels[length(location_levels)+1] = i
-}
-for (i in levels(data$Location.5)){
-  if (i %in% location_levels){
-    next
-  }
-  if (i == ''){
-    next
-  }
-  location_levels[length(location_levels)+1] = i
+for (level in TheLevels){
+    for (i in levels(data[level])){
+        if (i %in% location_levels){
+            next
+        }
+        if (i == ''){
+            next
+        }
+        location_levels[length(location_levels)+1] = i
+    }
 }
 ```
 ```{r}
@@ -63,8 +38,11 @@ for (i in 1:nrow(mydata)){
   mydata$sets[i] = 0
   for (j in 1:nrow(data)){
     temp = data[j,]
-    if ((temp$Location.1 == location_levels[i]) | (temp$Location.2 == location_levels[i]) | (temp$Location.3 == location_levels[i]) |
-        (temp$Location.4 == location_levels[i]) | (temp$Location.5 == location_levels[i])){
+    if ((temp$Location.1 == location_levels[i]) | 
+        (temp$Location.2 == location_levels[i]) | 
+        (temp$Location.3 == location_levels[i]) |
+        (temp$Location.4 == location_levels[i]) | 
+        (temp$Location.5 == location_levels[i])){
           mydata$sets[i] = mydata$sets[i]+1
         }
   }
