@@ -82,6 +82,14 @@ mydata$country[is.na(mydata$country)] <- "philippines"
 mydata$country[mydata$country == "Taiwan"] <- "China"
 keys[4] = c("country")
 mydata = mydata[keys]
+
+country_list = list()
+sum = 1
+for (i in unique(mydata$country))
+{
+  country_list[sum] = list(i)
+  sum = sum + 1
+} 
 ```
 
 
@@ -91,4 +99,73 @@ library(ggmap)
 myLocation <- c(-140, -50, 150, 70)
 myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
 ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets), data=mydata, alpha=0.5, color="darkred")
+```
+
+Start new part! Use shiny to show the data.
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  
+  titlePanel("My Project!!!-Mengxiao"),
+
+  sidebarLayout(
+    
+    sidebarPanel(
+      
+      sliderInput(inputId = "range",
+                  label = "Range of strains:",
+                  min = 1,
+                  max = 60,
+                  value = c(1, 60)),
+      
+      selectInput(inputId = "selects",
+                  label = "Countries",
+                  choices = country_list, selected = "US"),
+      
+      textInput("text", h3("Strains"), 
+                value = "Enter text...")  
+    ),
+    
+    # Main panel for displaying outputs ----
+    mainPanel(
+      
+      # Output: Histogram ----
+      plotOutput(outputId = "distPlot"),
+      textOutput("values")
+      
+    )
+  )
+)
+```
+Server part.
+```{r}
+server <- function(input, output) {
+  
+  # Histogram of the Old Faithful Geyser Data ----
+  # with requested number of bins
+  # This expression that generates a histogram is wrapped in a call
+  # to renderPlot to indicate that:
+  #
+  # 1. It is "reactive" and therefore should be automatically
+  #    re-executed when inputs (input$bins) change
+  # 2. Its output type is a plot
+  output$distPlot <- renderPlot({
+    
+    x    <- faithful$waiting
+    country <- input$selects
+    sequences <- input$text
+    range <- input$range
+    myLocation <- c(-140, -50, 150, 70)
+    myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
+    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets),   data=mydata[mydata$sets<=input$range[2]&mydata$sets>=input$range[1],], alpha=0.5, color="darkred")
+  }) 
+  output$values <- renderText({
+    paste("my value: ", input$range[1], "toto", input$range[2])
+  })
+}
+```
+Start server.
+```{r}
+shinyApp(ui = ui, server = server)
 ```
