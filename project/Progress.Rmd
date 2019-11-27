@@ -8,6 +8,7 @@ output: pdf_document
 ```{r}
 library(dplyr)
 library(tidyr)
+library(maps)
 
 data <- read.csv('https://scads.eecs.wsu.edu/wp-content/uploads/2017/10/AM_strains_clean.csv', fileEncoding='utf-16', na.string = '?', sep='\t')
 ```
@@ -70,16 +71,24 @@ for (i in 1:nrow(mydata)){
   }
 }
 mydata = mydata %>% 
-  separate(location_levels, into=c("x", "y"), sep=",")
-mydata$x = as.numeric(mydata$x)
-mydata$y = as.numeric(mydata$y)
+  separate(location_levels, into=c("y", "x"), sep=",")
+mydata$longitude = as.numeric(mydata$x)
+mydata$latitude = as.numeric(mydata$y)
+keys = c("longitude", "latitude", "sets")
+mydata = mydata[keys]
+mydata$country <- map.where('world', mydata$longitude, mydata$latitude)
+mydata = mydata %>% separate(country, into=c("country", "city"), sep=":")
+mydata$country[is.na(mydata$country)] <- "philippines"
+mydata$country[mydata$country == "Taiwan"] <- "China"
+keys[4] = c("country")
+mydata = mydata[keys]
 ```
 
 
 Start new part! Drawing map to see the locations.
 ```{r}
 library(ggmap)
-myLocation <- c(-160, -80, 160, 80)
-myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", crop=FALSE, zoom=9)
-ggmap(myMap)+geom_point(aes(x=x, y=y, size=sets), data=mydata, alpha=0.5, color="darkred")
+myLocation <- c(-140, -50, 150, 70)
+myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
+ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets), data=mydata, alpha=0.5, color="darkred")
 ```
