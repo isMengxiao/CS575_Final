@@ -74,3 +74,12 @@ mydata = mydata %>%
 mydata$x = as.numeric(mydata$x)
 mydata$y = as.numeric(mydata$y)
 ```
+
+
+Start new part! Drawing map to see the locations.
+```{r}
+library(ggmap)
+myLocation <- c(-160, -80, 160, 80)
+myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", crop=FALSE, zoom=9)
+ggmap(myMap)+geom_point(aes(x=x, y=y, size=sets), data=mydata, alpha=0.5, color="darkred")
+```
