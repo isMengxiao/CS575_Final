@@ -84,21 +84,22 @@ keys[4] = c("country")
 mydata = mydata[keys]
 
 country_list = list()
-sum = 1
+country_list[1] = list("Global")
+sum = 2
 for (i in unique(mydata$country))
 {
   country_list[sum] = list(i)
   sum = sum + 1
-} 
+}
 ```
 
 
 Start new part! Drawing map to see the locations.
 ```{r}
 library(ggmap)
-myLocation <- c(-140, -50, 150, 70)
-myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
-ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets), data=mydata, alpha=0.5, color="darkred")
+#myLocation <- c(-140, -50, 150, 70)
+#myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
+#ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets), data=mydata, alpha=0.5, color="darkred")
 ```
 
 Start new part! Use shiny to show the data.
@@ -107,7 +108,7 @@ library(shiny)
 
 ui <- fluidPage(
   
-  titlePanel("My Project!!!-Mengxiao"),
+  #titlePanel("My Project!!!-Mengxiao"),
 
   sidebarLayout(
     
@@ -118,13 +119,13 @@ ui <- fluidPage(
                   min = 1,
                   max = 60,
                   value = c(1, 60)),
-      
+      br(),
       selectInput(inputId = "selects",
                   label = "Countries",
-                  choices = country_list, selected = "US"),
-      
+                  choices = country_list, selected = "Global"),
+      br(),
       textInput("text", h3("Strains"), 
-                value = "Enter text...")  
+                value = "Enter text..."),
     ),
     
     # Main panel for displaying outputs ----
@@ -132,7 +133,6 @@ ui <- fluidPage(
       
       # Output: Histogram ----
       plotOutput(outputId = "distPlot"),
-      textOutput("values")
       
     )
   )
@@ -156,13 +156,50 @@ server <- function(input, output) {
     country <- input$selects
     sequences <- input$text
     range <- input$range
+    
     myLocation <- c(-140, -50, 150, 70)
     myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
-    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets),   data=mydata[mydata$sets<=input$range[2]&mydata$sets>=input$range[1],], alpha=0.5, color="darkred")
+    if (country == "Global"){
+      newdata <- mydata
+    }
+    else{
+      newdata <- mydata[mydata$country == country, ]
+    }
+    newdata <- newdata[mydata$sets<=input$range[2]&mydata$sets>=input$range[1], ]
+    
+    if (sequences != '' & sequences != "Enter text..."){
+      if (sum(data$Sequence == sequences)){
+        firstdata = data[data$Sequence == sequences, ]
+        newlocations = data.frame(
+          latitude = rep(0, 5),
+          longitude = rep(0, 5),
+          sets = rep(0, 5))
+        newlocations[1,1:2] = data.frame(firstdata$Location.1) %>% separate(firstdata.Location.1, into=c("latitude", "longitude"), sep=",")
+        newlocations[2,1:2] = data.frame(firstdata$Location.2) %>% separate(firstdata.Location.2, into=c("latitude", "longitude"), sep=",")
+        newlocations[3,1:2] = data.frame(firstdata$Location.3) %>% separate(firstdata.Location.3, into=c("latitude", "longitude"), sep=",")
+        newlocations[4,1:2] = data.frame(firstdata$Location.4) %>% separate(firstdata.Location.4, into=c("latitude", "longitude"), sep=",")
+        newlocations[5,1:2] = data.frame(firstdata$Location.5) %>% separate(firstdata.Location.5, into=c("latitude", "longitude"), sep=",")
+        c = list(1,2,3,4,5)
+        for (i in c){
+          if (is.na(newlocations[i, 2])){
+            newlocations[i, 3] = 0
+          }
+          else{
+            newlocations[i, 3] = 1
+          }
+        }
+        newdata = newlocations
+        newdata$longitude = as.numeric(newdata$longitude)
+        newdata$latitude = as.numeric(newdata$latitude)
+      }
+    }
+    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 10, 20, 60))), data = newdata, alpha=0.5)+scale_colour_manual(name = "sets",
+                     values = c("(0, 10]" = "green",
+                                  "(10, 20]" = "yellow",
+                                  "(20, 60]" = "red"),
+                     labels = c("<= 10", "10 < sets <= 20", "> 20"))
   }) 
-  output$values <- renderText({
-    paste("my value: ", input$range[1], "toto", input$range[2])
-  })
+  
 }
 ```
 Start server.

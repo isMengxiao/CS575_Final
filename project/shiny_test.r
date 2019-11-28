@@ -20,15 +20,20 @@ ui <- fluidPage(
                                  "Mexico" = 3, "Brazil" = 4), selected = 1),
       
       textInput("text", h3("Strains"), 
-                value = "Enter text...")  
+                value = "Enter text..."),
+      
+      checkboxGroupInput(inputId = "range_action", 
+                   label = "Search",
+                   choices = list("Use this" = 1),
+                   selected = 1),
     ),
     
     # Main panel for displaying outputs ----
     mainPanel(
       
       # Output: Histogram ----
-      plotOutput(outputId = "distPlot")
-      
+      plotOutput(outputId = "distPlot"),
+      textOutput("values")
     )
   )
 )
@@ -43,15 +48,24 @@ server <- function(input, output) {
   #    re-executed when inputs (input$bins) change
   # 2. Its output type is a plot
   output$distPlot <- renderPlot({
-    
     x    <- faithful$waiting
+    action <- input$range_action
     bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    hist(x, breaks = bins, col = "#75AADB", border = "white",
+    if (TRUE){
+      hist(x, breaks = bins, col = "#75AADB", border = "white",
          xlab = "Waiting time to next eruption (in mins)",
          main = "Histogram of waiting times")
-    
+
+    }
+      print(action)
   })
-  
+  output$values <- renderText({
+    action <- input$text
+    print(action=='')
+    if (TRUE){
+          paste("my value: ", action, " end")
+    }
+
+  })
 }
 shinyApp(ui = ui, server = server)
