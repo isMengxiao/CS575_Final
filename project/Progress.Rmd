@@ -109,33 +109,37 @@ library(shiny)
 ui <- fluidPage(
   
   #titlePanel("My Project!!!-Mengxiao"),
-
-  sidebarLayout(
-    
-    sidebarPanel(
+  fluidRow(
+    sidebarLayout(
       
-      sliderInput(inputId = "range",
-                  label = "Range of strains:",
-                  min = 1,
-                  max = 60,
-                  value = c(1, 60)),
-      br(),
-      selectInput(inputId = "selects",
-                  label = "Countries",
-                  choices = country_list, selected = "Global"),
-      br(),
-      textInput("text", h3("Strains"), 
-                value = "Enter text..."),
-    ),
-    
-    # Main panel for displaying outputs ----
-    mainPanel(
+      sidebarPanel(
+        
+        sliderInput(inputId = "range",
+                    label = "Range of strains:",
+                    min = 1,
+                    max = 60,
+                    value = c(1, 60)),
+        br(),
+        selectInput(inputId = "selects",
+                    label = "Countries",
+                    choices = country_list, selected = "Global"),
+        br(),
+        textInput("text", h3("Strains"), 
+                  value = "Enter text..."),
+      ),
       
-      # Output: Histogram ----
-      plotOutput(outputId = "distPlot"),
-      
+      # Main panel for displaying outputs ----
+      mainPanel(
+        
+        # Output: Histogram ----
+        plotOutput(outputId = "myPlot"),
+      )
     )
+  ),
+  fluidRow(
+    plotOutput(outputId = "distPlot")
   )
+  
 )
 ```
 Server part.
@@ -193,13 +197,13 @@ server <- function(input, output) {
         newdata$latitude = as.numeric(newdata$latitude)
       }
     }
-    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 10, 20, 60))), data = newdata, alpha=0.5)+scale_colour_manual(name = "sets",
-                     values = c("(0, 10]" = "green",
-                                  "(10, 20]" = "yellow",
-                                  "(20, 60]" = "red"),
+    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 10, 20, 60))), data = newdata, alpha=0.8)+scale_colour_manual(name = "sets",
+                     values = c("green", "red", "black"),
                      labels = c("<= 10", "10 < sets <= 20", "> 20"))
   }) 
-  
+  output$myplot <-  renderPlot({
+    plot(mydata$sets)
+  })
 }
 ```
 Start server.
