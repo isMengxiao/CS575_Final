@@ -97,6 +97,7 @@ for (i in unique(mydata$country))
 Start new part! Drawing map to see the locations.
 ```{r}
 library(ggmap)
+library(leaflet)
 #myLocation <- c(-140, -50, 150, 70)
 #myMap <- get_map(location=myLocation, source="stamen", maptype="terrain", zoom=3)
 #ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets), data=mydata, alpha=0.5, color="darkred")
@@ -132,12 +133,12 @@ ui <- fluidPage(
       mainPanel(
         
         # Output: Histogram ----
-        plotOutput(outputId = "myPlot"),
+        plotOutput(outputId = "myPlot", width = "400px", height="400px"),
       )
     )
   ),
   fluidRow(
-    plotOutput(outputId = "distPlot")
+    plotOutput(outputId = "distPlot", width="100%", height="1000px")
   )
   
 )
@@ -153,7 +154,11 @@ server <- function(input, output) {
   #
   # 1. It is "reactive" and therefore should be automatically
   #    re-executed when inputs (input$bins) change
-  # 2. Its output type is a plot
+  # 2. Its output type is a plot  
+  output$myPlot <-  renderPlot({
+    plot(mydata$sets)
+  })
+  
   output$distPlot <- renderPlot({
     
     x    <- faithful$waiting
@@ -197,13 +202,11 @@ server <- function(input, output) {
         newdata$latitude = as.numeric(newdata$latitude)
       }
     }
-    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 10, 20, 60))), data = newdata, alpha=0.8)+scale_colour_manual(name = "sets",
+    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 20, 40, 60))), data = newdata, alpha=0.8)+scale_colour_manual(name = "sets",
                      values = c("green", "red", "black"),
-                     labels = c("<= 10", "10 < sets <= 20", "> 20"))
+                     labels = c("<= 20", "20 < sets <= 40", "> 40"))+scale_size_continuous(range=c(4, 15))
   }) 
-  output$myplot <-  renderPlot({
-    plot(mydata$sets)
-  })
+
 }
 ```
 Start server.
