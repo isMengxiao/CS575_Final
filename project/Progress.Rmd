@@ -202,9 +202,9 @@ server <- function(input, output) {
         newdata$latitude = as.numeric(newdata$latitude)
       }
     }
-    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 20, 40, 60))), data = newdata, alpha=0.8)+scale_colour_manual(name = "sets",
-                     values = c("green", "red", "black"),
-                     labels = c("<= 20", "20 < sets <= 40", "> 40"))+scale_size_continuous(range=c(4, 15))
+    ggmap(myMap)+geom_point(aes(x=longitude, y=latitude, size=sets, colour = cut(sets, c(0, 5, 20, 40, 60))), data = newdata, alpha=0.8)+scale_colour_manual(name = "sets",
+                     values = c("green", "blue", "yellow", "red"),
+                     labels = c("<= 5", "5< sets <= 20", "20 < sets <= 40", "> 40"))+scale_size_continuous(range=c(4, 15))
   }) 
 
 }
