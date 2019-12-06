@@ -1,6 +1,6 @@
 ---
 title: "Project"
-author: "Mengxiao"
+author: "Mengxiao, Lei, Chenyan"
 date: "2019/10/27"
 output: pdf_document
 ---
